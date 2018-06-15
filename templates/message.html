@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+    <title>Queue Speed Analyzer 0.14b</title>
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans" rel="stylesheet"> 
+    <!--
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
+    -->
+    <meta charset='utf-8'>
+<!-- ################# CSS STYLES ################## -->
+      <style type="text/css">
+        .logo{color:white; font-size:2rem; display:inline-block;
+            position:absolute; top:0.5rem; text-align:left;
+            padding-left:1ex;
+            width:100%; z-index:10;
+            display:block;}
+
+        html{margin:0;            font-family:"IBM Plex Sans";
+}
+        body{background-color:#ddd; background-image:url('/static/w1.png'); margin:0; padding:0;}
+          #video{width:576px; height:432px; background-color:#fff;}
+          #photo{ width:576px; height:432px;  background-color:#fff;}
+          #canvas{display:none;}
+          .camera{width: 580px; display:inline-block;padding-right:2em;}
+          .output{width: 580px; display:inline-block;padding-left:2em;}
+          h1,h2,h3{font-weight:300; }
+          .contentarea{font-size: 16px; font-family: "Lucida Grande", "Arial", sans-serif; 
+                      max-width:75%;
+                      min-height:600px;
+                      margin-left:22.5%;
+                      margin-right:2.5%;
+                      margin-top:5rem;
+                      border:1px solid #ccc;
+                      border-radius:0.2ex;
+                      box-shadow:2px 2px 1px #aaa;
+                      text-align:center;
+                      padding:1em 0em 1em 0em;
+                      background-color:rgba(240,240,240,0.4);    
+        }
+        .toolbar{position:absolute; top:0; left:0; width:100%; 
+            height:4rem; background-color:black;
+                background-image:url('/static/mochaGrunge0.png');
+                text-align:center;
+                z-index:5;
+                box-shadow:0px 3px 2px #333;}
+        .toolbar a:hover{background-color:#aaa;}
+        .toolbar a{
+           /* padding: 1ex 2ex 1ex 2ex;*/
+            font-size:2rem;
+            margin-top:0.75rem;
+            width:4.5rem;
+            line-height:4.5rem;
+            display:inline-block;
+            border-radius:50%;
+            border-left:2px solid #fff;
+            border-top:2px solid #fff;
+            border-right:2px solid #bbb;
+            border-bottom:2px solid #bbb;
+
+            background-color:#dadada; color:#444; font-weight:bold;
+            z-index:100;}
+        .toolbar a:hover{cursor: pointer;}
+        .buttons{display:inline-block;}
+        .toolbar2{position:absolute; top:6rem; left:0; width:100%; 
+            padding:6px 0px 4px 0px;
+            box-shadow:0px 3px 2px #777;
+            height:4rem; background-color:#777;
+                background-image:url('/static/mochaGrunge.png');
+                }
+        form{float:left;padding-right:1em;}
+        #setbinempty{float:right; margin-right:1em;}
+        input{height:1em; border:1px solid white;}
+        #setbinempty, #settings{ text-decoration:none; font-weight:bold; 
+            color:white; background-color:#37c; display:inline-block;
+            border-left:1px solid rgb(109, 156, 214);
+            border-top:1px solid rgb(109, 156, 214);
+            border-right:1px solid #25a;
+            border-bottom:1px solid #25a;
+            box-shadow:1px 1px 2px #555;
+
+            height:2.5rem;
+            line-height:2.5rem;
+            margin-top:0.9rem;
+            border-radius:1ex;
+            padding:0 1ex 0 1ex;
+        }
+        #changemsg{padding-left:2ex; font-size:1.5em; font-weight:bold; display:inline-block; font-variant: small-caps; color:#fff;}
+        #setbinempty:hover, #settings:hover{cursor: pointer;}
+        .leftbar{width:20%; 
+            background-image:url('/static/mochaGrunge0.png');
+         min-height:100%; overflow:hidden; left:0; top:0;
+         padding-top:3rem; text-align:center;
+            position:fixed;color:white; }
+        .leftbar h3{font-size:1.5em; color:white;}
+        .leftbar a{color:white; }
+        li{margin-top:0.25em;}
+        .lititle{font-weight:bold;}
+        .bigimg{width:80%;}
+        .smimg{width:19%;}
+      </style>
+<!--<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>-->
+<!--<script src="static/main.js"></script>-->
+</head>
+
+<!-- ################# the web page itself / HTML ################## -->
+<body>
+    <span class="logo">
+            Queue Speed Analyzer 0.14b
+    </span>
+    <div class="leftbar">
+        <div style="margin:auto; display:inline-block; text-align:justify;">
+            <h3>&nbsp;</h3>
+            <a href="/">HOME</a>
+            <ul>
+                {% for item in ddict %}
+                    <li><a href="/?id={{item}}">{{item}}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="toolbar">   
+        <div class="buttons" style="display:none;">
+            <a id="START"><i class="fas fa-play"></i></a>
+            &nbsp;
+            <a id="STOP"><i class="fas fa-stop"></i></a>
+            <a id="DOWNLOAD" style="display:none;"><i class="fas fa-file-archive"></i></a>
+        </div>
+    </div>
+
+    <div class="toolbar2" style="display:none;">
+        <form id="settingsform" action='/settings' method="POST">
+            <span class="formfield">
+                &nbsp;&nbsp;<input name="threshpct" value=2 style="width:3ex;" autocomplete=off>% of screen occupied by rubbish
+            </span>
+            <br>
+            <span class="formfield">
+                &nbsp;&nbsp;<input name="transiencetime" value=5 style="width:3ex;" autocomplete=off> seconds to ignore motion
+            </span>
+            <br>
+            <span class="formfield">
+                &nbsp;&nbsp;<input name="floorthresh" value=20 style="width:3ex;" autocomplete=off>% detection floor
+            </span>
+        </form>
+        
+        <a id="settings">update settings</a>   
+        <span id="changemsg" style="display:none;">changes applied</span>
+        <a id="setbinempty">set bin as empty</a>
+        
+    </div>
+
+    <div class="contentarea">
+
+        <div id="vidinfo" style="display:inline-block; vertical-align:top; width:19%; border:1px solid black; text-align:justify;">
+        </div>
+        <div>
+            <h2>{{message}}</h2>
+            <a href="/">HOME</a>
+        </div>
+    </div>
+</body>
+</html>
