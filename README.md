@@ -29,3 +29,4 @@ Aside from python modules, redis-server is also required for background task pro
 stopping webpages from loading, etc). It is a trivial change to disable rq scheduling, you would simply comment out lines 59-61 of `vproc.py`
 and then uncomment line 62. That would be it, aside from commenting out the import at the top of the file, then RQ would no longer be required.
 
+To run, you would simply `python3 qweb.py` and then navigate to http://localhost:8080
